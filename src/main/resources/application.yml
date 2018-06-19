@@ -1,0 +1,31 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: norepqw2
+    url: jdbc:postgresql://localhost:5432/poems
+
+    dbcp2:
+      max-idle: 5
+  data:
+    jpa:
+      repositories:
+        enabled: true
+    mongodb:
+      uri: mongodb://ness:norepqw2@cluster0-shard-00-00-empay.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin
+logging:
+  level:
+    org:
+      springframework: info
+
+activemq:
+  address: tcp://localhost:61616
+  topic:
+    poem: POEM
+    activity: ACTIVITY
+  consumers: 4
