@@ -7,10 +7,10 @@ import javax.persistence.*;
 import java.util.Objects;
 import java.util.Set;
 
-@XmlRootElement
 @Entity
 @Table(name = "tag")
-@Getter @Setter @NoArgsConstructor
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
 public class Tag {
 
     @Id

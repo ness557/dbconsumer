@@ -47,10 +47,8 @@ public class MQConsumer implements Consumer {
         Destination poemDestination = session.createTopic(poemTopic);
         Destination activityDestination = session.createTopic(activityTopic);
 
-
         // Create a MessageConsumer from the Session to the Topic or Queue
         MessageConsumer poemConsumer = session.createConsumer(poemDestination);
-        MessageConsumer activityConsumer = session.createConsumer(activityDestination);
 
         poemConsumer.setMessageListener((msg) -> {
             try {
@@ -60,11 +58,7 @@ public class MQConsumer implements Consumer {
                     String tagString = mapMessage.getString("tags");
                     Set<Tag> tags =
                             Arrays.stream(tagString.split(","))
-                                    .map(n -> {
-                                        Tag tag = new Tag();
-                                        tag.setName(n);
-                                        return tag;
-                                    })
+                                    .map(n -> new Tag(null, n, null))
                                     .collect(Collectors.toSet());
 
                     Poem poem = new Poem(null,
@@ -73,18 +67,6 @@ public class MQConsumer implements Consumer {
                             tags);
 
                     poemService.addPoem(poem);
-                }
-            } catch (JMSException e) {
-                e.printStackTrace();
-            }
-        });
-
-        activityConsumer.setMessageListener((msg) -> {
-            try {
-                //todo db poemService and repo for user activity
-                if (msg instanceof TextMessage) {
-                    TextMessage textMessage = (TextMessage) msg;
-                    System.out.println(textMessage.getText());
                 }
             } catch (JMSException e) {
                 e.printStackTrace();
