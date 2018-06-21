@@ -9,7 +9,6 @@ import simple.microservices.dbconsumer.model.Poem;
 import simple.microservices.dbconsumer.model.Tag;
 import simple.microservices.dbconsumer.repository.PoemCrudRepository;
 import simple.microservices.dbconsumer.repository.PoemMongoRepository;
-import simple.microservices.dbconsumer.repository.SequenceRepository;
 import simple.microservices.dbconsumer.repository.TagCrudRepository;
 
 import javax.transaction.Transactional;
@@ -23,23 +22,20 @@ import java.util.concurrent.locks.ReentrantLock;
 @Transactional
 public class PoemServiceImpl implements PoemService {
 
-    private PoemCrudRepository jpaRepository;
-    private TagCrudRepository tagCrudRepository;
-    private PoemMongoRepository mongoRepository;
-    private SequenceRepository sequenceRepository;
+    private PoemCrudRepository poemRepository;
+    private TagCrudRepository tagRepository;
+    private PoemMongoRepository poemMongoRepository;
     private Lock lock;
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     public PoemServiceImpl(PoemCrudRepository poemCrudRepository,
-                           TagCrudRepository tagCrudRepository,
-                           PoemMongoRepository poemMongoRepository,
-                           SequenceRepository sequenceRepository) {
-        this.jpaRepository = poemCrudRepository;
-        this.tagCrudRepository = tagCrudRepository;
-        this.mongoRepository = poemMongoRepository;
-        this.sequenceRepository = sequenceRepository;
+                           TagCrudRepository tagRepository,
+                           PoemMongoRepository poemMongoRepository) {
+        this.poemRepository = poemCrudRepository;
+        this.tagRepository = tagRepository;
+        this.poemMongoRepository = poemMongoRepository;
         this.lock = new ReentrantLock();
 
     }
@@ -59,30 +55,29 @@ public class PoemServiceImpl implements PoemService {
 
         try {
             logger.info("Trying to add poem to jpa repo");
-            poem.setId(sequenceRepository.getNextSeqId(SeqKeys.POEM_SEQ));
 
-            if (!jpaRepository.existsByUsernameAndData(poem.getUsername(), poem.getData())) {
+            if (!poemRepository.existsByUsernameAndData(poem.getUsername(), poem.getData())) {
 
                 Set<Tag> updatedTags = new HashSet<>();
-                for (Tag t : poem.getTags()) {
-                    Tag fromDB = tagCrudRepository.findByName(t.getName());
+                Set<Tag> tags = poem.getTags();
+
+                for (Tag t : tags) {
+                    Tag fromDB = tagRepository.findByName(t.getName());
                     if (fromDB != null)
-                        t.setId(fromDB.getId());
-                    else
-                        t.setId(sequenceRepository.getNextSeqId(SeqKeys.TAG_SEQ));
+                        t = fromDB;
+                    t.getPoems().add(poem);
                     updatedTags.add(t);
-
                 }
-                poem.setTags(updatedTags);
 
-                jpaRepository.save(poem);
+                tagRepository.save(updatedTags);
+
                 logger.info("added");
             }
 
             logger.info("Trying to add poem to mongo repo");
-            if (!mongoRepository.existsByUsernameAndData(poem.getUsername(), poem.getData())) {
+            if (!poemMongoRepository.existsByUsernameAndData(poem.getUsername(), poem.getData())) {
 
-                mongoRepository.save(poem);
+                poemMongoRepository.save(poem);
                 logger.info("added");
             }
         } finally {

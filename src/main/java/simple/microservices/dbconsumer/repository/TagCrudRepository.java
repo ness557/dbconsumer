@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import simple.microservices.dbconsumer.model.Tag;
 
 @Repository
-public interface TagCrudRepository extends CrudRepository<Tag, Integer> {
+public interface TagCrudRepository extends CrudRepository<Tag, String> {
     Tag findByName(String name);
 }

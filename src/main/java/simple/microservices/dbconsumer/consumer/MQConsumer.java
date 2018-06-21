@@ -11,6 +11,7 @@ import simple.microservices.dbconsumer.service.PoemService;
 
 import javax.jms.*;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -58,13 +59,12 @@ public class MQConsumer implements Consumer {
                     String tagString = mapMessage.getString("tags");
                     Set<Tag> tags =
                             Arrays.stream(tagString.split(","))
-                                    .map(n -> new Tag(null, n, null))
+                                    .map(n -> new Tag(n, new HashSet<>()))
                                     .collect(Collectors.toSet());
 
-                    Poem poem = new Poem(null,
+                    Poem poem = new Poem(0,
                             mapMessage.getString("username"),
-                            mapMessage.getString("data"),
-                            tags);
+                            mapMessage.getString("data"), tags);
 
                     poemService.addPoem(poem);
                 }

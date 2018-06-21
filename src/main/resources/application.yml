@@ -3,6 +3,7 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: true
+    database: postgresql
 
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -28,4 +29,4 @@ activemq:
   topic:
     poem: POEM
     activity: ACTIVITY
-  consumers: 4
+  consumers: 1

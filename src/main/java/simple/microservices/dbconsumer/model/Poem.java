@@ -13,7 +13,10 @@ import java.util.Set;
 public class Poem {
 
     @Id
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "poem_gen")
+    @SequenceGenerator(name = "poem_gen", sequenceName = "poem_seq")
+    @org.springframework.data.annotation.Transient
+    private int id;
 
     @Column(name = "author")
     private String username;
@@ -21,15 +24,6 @@ public class Poem {
     @Column(name = "text")
     private String data;
 
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE,
-                    CascadeType.REFRESH,
-                    CascadeType.DETACH
-            })
-    @JoinTable(name = "tag_poem",
-            joinColumns = {@JoinColumn(name = "poem_id", referencedColumnName = "id")},
-            inverseJoinColumns = {@JoinColumn(name = "tag_id", referencedColumnName = "id")})
+    @Transient
     private Set<Tag> tags;
 }
